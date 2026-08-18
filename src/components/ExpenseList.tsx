@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import type { Expense } from '../types';
 import { CATEGORY_COLORS } from '../types';
 import { formatCurrency, formatDate } from '../schema';
@@ -9,6 +10,14 @@ interface Props {
 }
 
 export function ExpenseList({ expenses, onEdit, onDelete }: Props) {
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!confirmId) return;
+    const timer = setTimeout(() => setConfirmId(null), 4000);
+    return () => clearTimeout(timer);
+  }, [confirmId]);
+
   if (expenses.length === 0) {
     return (
       <div className="text-center py-12 text-text-soft text-sm">
@@ -48,13 +57,32 @@ export function ExpenseList({ expenses, onEdit, onDelete }: Props) {
             >
               Edit
             </button>
-            <button
-              onClick={() => onDelete(e.id)}
-              aria-label={`Padam ${e.category} ${formatCurrency(e.amount)}`}
-              className="text-text-soft hover:text-danger text-xs px-2 py-1 rounded transition-colors"
-            >
-              Padam
-            </button>
+            {confirmId === e.id ? (
+              <>
+                <button
+                  onClick={() => { onDelete(e.id); setConfirmId(null); }}
+                  aria-label={`Pastikan padam ${e.category} ${formatCurrency(e.amount)}`}
+                  className="text-danger hover:text-danger-hover text-xs px-2 py-1 rounded transition-colors"
+                >
+                  Pastikan
+                </button>
+                <button
+                  onClick={() => setConfirmId(null)}
+                  aria-label="Batal padam"
+                  className="text-text-soft hover:text-text text-xs px-2 py-1 rounded transition-colors"
+                >
+                  Batal
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setConfirmId(e.id)}
+                aria-label={`Padam ${e.category} ${formatCurrency(e.amount)}`}
+                className="text-text-soft hover:text-danger text-xs px-2 py-1 rounded transition-colors"
+              >
+                Padam
+              </button>
+            )}
           </div>
         </li>
       ))}
