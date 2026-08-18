@@ -49,7 +49,7 @@ describe('AppView render', () => {
 
   it('renders the transaction list with currency', () => {
     const html = renderToString(createElement(AppView, api));
-    expect(html).toContain('RM42.50');
+    expect(html).toContain('RM 42.50');
     expect(html).toContain('Lunch');
     expect(html).toContain('aria-label="Senarai transaksi"');
   });

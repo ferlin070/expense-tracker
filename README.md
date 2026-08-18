@@ -5,9 +5,11 @@ A responsive expense tracking web app built with **React + TypeScript + Tailwind
 ## Features
 
 - **CRUD perbelanjaan** — tambah, edit, dan padam rekod (jumlah, kategori, tarikh, nota)
+- **Padam berkonfirmasi** — tindakan destruktif memerlukan sahkan ("Pastikan"/"Batal")
 - **Kategori tetap** — Makanan, Pengangkutan, Utiliti, Hiburan, Lain-lain
 - **Dashboard** — jumlah perbelanjaan bulan semasa + carta donut pecahan kategori
 - **Penapis** — tapis senarai transaksi mengikut bulan dan/atau kategori
+- **Export CSV** — muat turun senarai transaksi yang ditapis
 - **Persistence** — data kekal selepas browser ditutup (localStorage, error-safe)
 - **Responsive** — mobile single-column, desktop 2-column grid
 - **Aksesibiliti** — landmark, aria-labels, fokus form, reduced-motion support
@@ -59,7 +61,12 @@ src/
     ExpenseList.tsx     # Senarai transaksi
     CategoryChart.tsx   # Carta donut SVG (tiada library)
     FilterBar.tsx       # Penapis bulan + kategori
-  index.css             # Tailwind theme & design tokens
+    index.css           # Tailwind theme & design tokens
+  tests/
+    schema.test.ts      # Domain logic (validation, stats, filter, CSV)
+    storage.test.ts     # Persistence (corrupt data, quota error)
+    app.test.tsx        # Render SSR + a11y labels
+    interactions.test.tsx  # Klik, submit form, edit, padam, filter (Testing Library)
 ```
 
 ## State Management
