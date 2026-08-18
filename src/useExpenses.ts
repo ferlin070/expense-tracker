@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Expense, ExpenseDraft, FilterState } from './types';
 import { loadExpenses, saveExpenses } from './storage';
 import { createExpense, updateExpense, getCurrentMonth } from './schema';
@@ -9,20 +9,20 @@ export function useExpenses() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterState>({ month: getCurrentMonth(), category: null });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const expensesRef = useRef<Expense[]>([]);
 
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      const result = loadExpenses();
-      setExpenses(result.data);
-      if (!result.ok && result.error) setError(result.error);
-      else if (result.error) setError(result.error);
-      setLoading(false);
-    }, 200);
-    return () => clearTimeout(timer);
+    const result = loadExpenses();
+    expensesRef.current = result.data;
+    setExpenses(result.data);
+    if (result.error) setError(result.error);
+    setLoading(false);
   }, []);
 
-  const persist = useCallback((next: Expense[]) => {
+  const commit = useCallback((updater: (prev: Expense[]) => Expense[]) => {
+    const next = updater(expensesRef.current);
+    expensesRef.current = next;
+    setExpenses(next);
     const result = saveExpenses(next);
     if (!result.ok) setError(result.error ?? 'Save failed.');
     else setError(null);
@@ -30,35 +30,27 @@ export function useExpenses() {
 
   const addExpense = useCallback((draft: ExpenseDraft) => {
     const created = createExpense(draft);
-    setExpenses((prev) => {
-      const next = [created, ...prev];
-      persist(next);
-      return next;
-    });
-  }, [persist]);
+    commit((prev) => [created, ...prev]);
+  }, [commit]);
 
   const editExpense = useCallback((id: string, draft: ExpenseDraft) => {
-    setExpenses((prev) => {
+    commit((prev) => {
       const existing = prev.find((e) => e.id === id);
       if (!existing) return prev;
       const updated = updateExpense(existing, draft);
-      const next = prev.map((e) => (e.id === id ? updated : e));
-      persist(next);
-      return next;
+      return prev.map((e) => (e.id === id ? updated : e));
     });
-  }, [persist]);
+  }, [commit]);
 
   const deleteExpense = useCallback((id: string) => {
-    setExpenses((prev) => {
-      const next = prev.filter((e) => e.id !== id);
-      persist(next);
-      return next;
-    });
-  }, [persist]);
+    commit((prev) => prev.filter((e) => e.id !== id));
+  }, [commit]);
+
+  const dismissError = useCallback(() => setError(null), []);
 
   return {
     expenses, loading, error, filter, setFilter,
     editingId, setEditingId,
-    addExpense, editExpense, deleteExpense,
+    addExpense, editExpense, deleteExpense, dismissError,
   };
 }

@@ -16,10 +16,11 @@ export interface ExpensesApi {
   addExpense: (d: ExpenseDraft) => void;
   editExpense: (id: string, d: ExpenseDraft) => void;
   deleteExpense: (id: string) => void;
+  dismissError: () => void;
 }
 
 export function AppView(api: ExpensesApi) {
-  const { expenses, error, filter, setFilter, editingId, setEditingId, editExpense, addExpense, deleteExpense } = api;
+  const { expenses, error, filter, setFilter, editingId, setEditingId, editExpense, addExpense, deleteExpense, dismissError } = api;
   const editing = editingId ? expenses.find((e) => e.id === editingId) ?? null : null;
   const stats = computeMonthlyStats(expenses, filter.month);
   const filtered = filterExpenses(expenses, filter);
@@ -43,7 +44,7 @@ export function AppView(api: ExpensesApi) {
       {error && (
         <div role="alert" className="flex items-center justify-between gap-3 bg-danger/10 border border-danger/30 rounded-lg p-3 mb-4">
           <span className="text-danger text-sm">{error}</span>
-          <button onClick={() => setFilter({ ...filter })} className="text-danger text-lg leading-none" aria-label="Tutup amaran">×</button>
+          <button onClick={dismissError} className="text-danger text-lg leading-none" aria-label="Tutup amaran">×</button>
         </div>
       )}
 

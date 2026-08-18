@@ -22,6 +22,7 @@ const api = {
   addExpense: () => {},
   editExpense: () => {},
   deleteExpense: () => {},
+  dismissError: () => {},
 };
 
 describe('AppView render', () => {
