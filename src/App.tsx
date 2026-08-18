@@ -3,7 +3,7 @@ import { ExpenseForm } from './components/ExpenseForm';
 import { ExpenseList } from './components/ExpenseList';
 import { CategoryChart } from './components/CategoryChart';
 import { FilterBar } from './components/FilterBar';
-import { computeMonthlyStats, filterExpenses, formatCurrency } from './schema';
+import { computeMonthlyStats, filterExpenses, formatCurrency, toCsv } from './schema';
 import type { Expense, ExpenseDraft, FilterState } from './types';
 
 export interface ExpensesApi {
@@ -32,6 +32,16 @@ export function AppView(api: ExpensesApi) {
     } else {
       addExpense(draft);
     }
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([toCsv(filtered)], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'expenses.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -75,7 +85,16 @@ export function AppView(api: ExpensesApi) {
                   Jumlah bulan ini: <span className="text-text font-medium" style={{ fontFamily: 'ui-monospace, monospace' }}>{formatCurrency(stats.total)}</span>
                 </p>
               </div>
-              <span className="text-text-soft text-xs">{filtered.length} transaksi</span>
+              <div className="flex items-center gap-2">
+                <span className="text-text-soft text-xs">{filtered.length} transaksi</span>
+                <button
+                  onClick={handleExport}
+                  aria-label="Export senarai transaksi ke CSV"
+                  className="text-text-soft hover:text-primary text-xs px-2 py-1 rounded border border-border transition-colors"
+                >
+                  Export CSV
+                </button>
+              </div>
             </div>
             <FilterBar filter={filter} onFilterChange={setFilter} expenses={expenses} />
           </div>

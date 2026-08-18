@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createExpense, updateExpense, isExpense, createId,
   computeMonthlyStats, filterExpenses, getMonthKey,
-  ValidationError,
+  ValidationError, toCsv,
 } from '../schema';
 import type { Expense, ExpenseDraft } from '../types';
 
@@ -122,5 +122,20 @@ describe('getMonthKey', () => {
   it('extracts YYYY-MM from ISO date', () => {
     expect(getMonthKey('2025-01-15')).toBe('2025-01');
     expect(getMonthKey('2025-12-31')).toBe('2025-12');
+  });
+});
+
+describe('toCsv', () => {
+  it('produces header and escaped rows', () => {
+    const expenses: Expense[] = [
+      { id: createId(), amount: 12.5, category: 'Makanan', date: '2025-01-01', note: 'Nasi "special"', createdAt: 0, updatedAt: 0 },
+      { id: createId(), amount: 40, category: 'Hiburan', date: '2025-01-02', note: '', createdAt: 0, updatedAt: 0 },
+    ];
+    const csv = toCsv(expenses);
+    const lines = csv.split('\n');
+    expect(lines[0]).toBe('Jumlah,Kategori,Tarikh,Nota');
+    expect(lines[1]).toContain('12.5,Makanan,2025-01-01');
+    expect(lines[1]).toContain('"Nasi ""special"""');
+    expect(lines[2]).toContain('40,Hiburan,2025-01-02');
   });
 });

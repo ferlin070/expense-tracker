@@ -114,6 +114,17 @@ export function getAvailableMonths(expenses: Expense[]): string[] {
   return Array.from(months).sort((a, b) => b.localeCompare(a));
 }
 
+export function toCsv(expenses: Expense[]): string {
+  const header = 'Jumlah,Kategori,Tarikh,Nota';
+  const rows = expenses.map((e) => [
+    e.amount,
+    e.category,
+    e.date,
+    `"${e.note.replace(/"/g, '""')}"`,
+  ].join(','));
+  return [header, ...rows].join('\n');
+}
+
 export function seedExpenses(): Expense[] {
   const now = Date.now();
   const today = new Date();
